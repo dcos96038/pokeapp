@@ -25,7 +25,7 @@ const Navbar = () => {
         <Link passHref href="/">
           <MuiLink color="inherit" underline="none">
             <Typography color="white" variant={"h4"}>
-              Pokedown
+              PokeAPP
             </Typography>
           </MuiLink>
         </Link>
