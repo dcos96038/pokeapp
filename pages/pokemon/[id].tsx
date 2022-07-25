@@ -1,9 +1,9 @@
 import {GetStaticPaths, GetStaticProps} from "next";
 
-import pokeApi from "../../api/pokeApi";
 import Layout from "../../components/layouts/Layout";
 import PokemonView from "../../components/ui/pokemon/PokemonView";
 import {SinglePokemon} from "../../interfaces/pokemon";
+import {getPokemonInfo} from "../../utils/getPokemonInfo";
 
 interface Props {
   pokemon: SinglePokemon;
@@ -24,25 +24,29 @@ export const getStaticPaths: GetStaticPaths = async () => {
     paths: pokemon200.map((id) => ({
       params: {id},
     })),
-    fallback: false,
+    // fallback: false,
+    fallback: "blocking",
   };
 };
 
 export const getStaticProps: GetStaticProps = async ({params}) => {
   const {id} = params as {id: string};
 
-  const {data} = await pokeApi.get<SinglePokemon>(`/pokemon/${id}`);
+  const pokemon = await getPokemonInfo(id);
+
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
-      pokemon: {
-        name: data.name,
-        id: data.id,
-        sprites: data.sprites,
-        abilities: data.abilities,
-        weight: data.weight,
-        height: data.height,
-      },
+      pokemon,
+      revalidate: 86400,
     },
   };
 };

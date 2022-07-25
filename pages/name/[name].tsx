@@ -6,6 +6,7 @@ import Layout from "../../components/layouts/Layout";
 import PokemonView from "../../components/ui/pokemon/PokemonView";
 import {SinglePokemon} from "../../interfaces/pokemon";
 import {PokeListResponse} from "../../interfaces/pokemon-list";
+import {getPokemonInfo} from "../../utils/getPokemonInfo";
 
 interface Props {
   pokemon: SinglePokemon;
@@ -33,18 +34,21 @@ export const getStaticPaths: GetStaticPaths = async () => {
 export const getStaticProps: GetStaticProps = async ({params}) => {
   const {name} = params as {name: string};
 
-  const {data} = await pokeApi.get<SinglePokemon>(`/pokemon/${name}`);
+  const pokemon = await getPokemonInfo(name);
+
+  if (!pokemon) {
+    return {
+      redirect: {
+        destination: "/",
+        permanent: false,
+      },
+    };
+  }
 
   return {
     props: {
-      pokemon: {
-        name: data.name,
-        id: data.id,
-        sprites: data.sprites,
-        abilities: data.abilities,
-        weight: data.weight,
-        height: data.height,
-      },
+      pokemon,
+      revalidate: 86400,
     },
   };
 };
